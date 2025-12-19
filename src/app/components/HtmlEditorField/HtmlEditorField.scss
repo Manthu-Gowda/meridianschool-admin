@@ -1,0 +1,31 @@
+/* HtmlEditorField.scss */
+@use "../../globalStyles" as *;
+
+.html-editor-container {
+  .jodit-container {
+    border: 1px solid $primary_border;
+    box-shadow: 0px 0px 2px 0px #00000040;
+    border-radius: 8px !important;
+    overflow: hidden;
+
+    .jodit-wysiwyg {
+      min-height: 200px !important;
+      font-size: 15px;
+      color: $primary_text;
+    }
+  }
+}
+
+.forminput.has-error {
+  .jodit-container {
+    border-color: red !important;
+  }
+}
+
+.jodit-status-bar {
+  display: none !important;
+}
+
+.jodit-container .jodit-workplace + .jodit-status-bar {
+  display: none !important;
+}

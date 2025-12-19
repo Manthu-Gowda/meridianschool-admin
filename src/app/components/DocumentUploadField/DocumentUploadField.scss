@@ -1,0 +1,106 @@
+/* src/components/DocumentUploadField/DocumentUploadField.scss */
+@use "../../globalStyles" as *;
+
+.doc-field {
+  margin-bottom: 8px;
+
+  &__label-row {
+    margin-bottom: 6px;
+  }
+
+  &__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: $primary_text;
+  }
+
+  &__required {
+    color: red;
+    margin-left: 2px;
+  }
+
+  &__card {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 2px dashed #dbe5f2;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease,
+      background-color 0.2s ease;
+
+    &:hover {
+      border-style: solid;
+      border-color: $primary_text;
+      box-shadow: 0 0 0 1px rgba($primary_stroke, 0.1);
+      background-color: $primary_bg;
+    }
+
+    &.is-disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+  }
+
+  &__icon {
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__placeholder {
+    font-size: 14px;
+    color: $secondary_text;
+  }
+
+  &__file-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: $primary_text;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  &__sub-text {
+    font-size: 12px;
+    color: $secondary_text;
+    margin-top: 2px;
+  }
+
+  &__clear {
+    border: none;
+    background: transparent;
+    font-size: 12px;
+    color: red;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+
+  &__input {
+    display: none;
+  }
+
+  &__helper-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: $secondary_text;
+  }
+
+  &__error-text {
+    margin-top: 4px;
+    font-size: 12px;
+    color: red;
+  }
+
+  &.has-error {
+    .doc-field__card {
+      border-color: red;
+    }
+  }
+}
