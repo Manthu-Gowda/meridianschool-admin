@@ -18,6 +18,7 @@ import {
   PictureOutlined,
   PhoneOutlined,
   CloseOutlined,
+  CaretDownOutlined,
 
   // child icons
   BookOutlined,
@@ -285,28 +286,18 @@ const MENUS = [
 
 const MainLayout = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  // ✅ accordion: store only one open key (string or null)
   const [openKey, setOpenKey] = useState(null);
-
-  // mobile drawer open/close
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
   const screens = useBreakpoint();
   const isPhone = !screens.md;
-
   const location = useLocation();
   const navigate = useNavigate();
-
   const storedUser = sessionStorage.getItem("user");
   const userData = storedUser ? JSON.parse(storedUser) : null;
-
   const menuItems = useMemo(() => MENUS, []);
-
   const openMobileNav = () => setMobileNavOpen(true);
   const closeMobileNav = () => setMobileNavOpen(false);
 
-  /** ✅ auto-open parent when current route is a child */
   useEffect(() => {
     const parent = menuItems.find((m) =>
       m.children?.some((c) => location.pathname.startsWith(c.path))
@@ -314,7 +305,6 @@ const MainLayout = () => {
     if (parent) setOpenKey(parent.key);
   }, [location.pathname, menuItems]);
 
-  /** prevent background scroll when mobile drawer open */
   useEffect(() => {
     if (!isPhone) return;
     document.body.style.overflow = mobileNavOpen ? "hidden" : "";
@@ -330,7 +320,6 @@ const MainLayout = () => {
   };
 
   const toggleOpen = (key) => {
-    // ✅ accordion behavior
     setOpenKey((prev) => (prev === key ? null : key));
   };
 
@@ -370,7 +359,7 @@ const MainLayout = () => {
           style: {
             color: isActive ? "#ffffff" : "#919CB4",
             fontSize: "18px",
-            fontWeight: 600,
+            fontWeight: 700,
           },
         });
 
@@ -388,12 +377,10 @@ const MainLayout = () => {
               aria-expanded={hasChildren ? isOpen : undefined}
             >
               <span className="sidebar1_center_menu_icon">{coloredIcon}</span>
-
               <span className="sidebar1_center_menu_label">{item.text}</span>
-
               {hasChildren && (
                 <span className={`submenu_caret ${isOpen ? "open" : ""}`}>
-                  ▾
+               <CaretDownOutlined />
                 </span>
               )}
             </button>
@@ -414,7 +401,7 @@ const MainLayout = () => {
                         {child.icon && (
                           <span className="sidebar1_submenu_icon">
                             {cloneElement(child.icon, {
-                              style: { fontSize: "14px" },
+                              style: { fontSize: "16px" },
                             })}
                           </span>
                         )}
