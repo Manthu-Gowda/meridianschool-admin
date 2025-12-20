@@ -1,0 +1,32 @@
+@use "../../globalStyles" as *;
+
+.blockcard {
+    background-color: $primary_white;
+    padding: 20px 20px;
+    border-radius: 10px;
+    border: 1px solid $primary_border;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 92%;
+
+    &__title {
+        color: $primary_text;
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0;
+        text-align: center;
+    }
+
+    &:hover {
+        background-color: $primary_bg;
+        transform: scale(1.03);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    &:focus {
+        outline: none;
+        border-color: $brand_color;
+    }
+}
