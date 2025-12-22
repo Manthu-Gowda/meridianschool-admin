@@ -46,6 +46,10 @@ import GalleryVideos from "../pages/Gallery/GalleryVideos/GalleryVideos";
 // Contact
 import ContactForAdmission from "../pages/Contact/ContactForAdmission/ContactForAdmission";
 import Careers from "../pages/Contact/Careers/Careers";
+
+//Common Form
+import CommonForm from "../pages/CommonForm/CommonForm";
+
 const AppRoutes = () => (
   <Routes>
     <Route
@@ -99,6 +103,11 @@ const AppRoutes = () => (
       {/* Contact */}
       <Route path="/contact/admission" element={<ContactForAdmission />} />
       <Route path="/contact/careers" element={<Careers />} />
+
+      {/* Common Form */}
+      <Route path="/common-form/:typeId" element={<CommonForm />} />
+      <Route path="/common-form" element={<CommonForm />} />
+
     </Route>
   </Routes>
 );

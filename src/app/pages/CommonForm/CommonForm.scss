@@ -1,0 +1,152 @@
+@use "../../globalStyles" as *;
+.common-form-page {
+    padding: 2rem;
+    background-color: #f9fafb;
+    min-height: 100vh;
+
+    .form-header {
+        margin-bottom: 2rem;
+
+        h1 {
+            font-size: 1.8rem;
+            color: #111827;
+            margin: 0;
+        }
+    }
+
+    .items-list {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+
+        .content-item-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e5e7eb;
+
+            .item-view-content {
+                padding: 1.5rem;
+
+                .view-row {
+                    margin-bottom: 1rem;
+
+                    &.gallery-row {
+                        display: flex;
+                        gap: 10px;
+                        flex-wrap: wrap;
+                    }
+                }
+
+                .view-image-preview {
+                    max-width: 100%;
+                    max-height: 300px;
+                    object-fit: cover;
+                    border-radius: 4px;
+
+                    &.small {
+                        width: 100px;
+                        height: 100px;
+                    }
+                }
+
+                h3 {
+                    margin: 0 0 0.5rem;
+                    font-size: 1.25rem;
+                }
+
+                h4 {
+                    margin: 0 0 0.5rem;
+                    color: #6b7280;
+                    font-weight: 500;
+                }
+
+                .description-text {
+                    color: #374151;
+                    white-space: pre-wrap;
+                    line-height: 1.5;
+                }
+
+                .meta-tags {
+                    margin-top: 1rem;
+                    display: flex;
+                    gap: 1rem;
+                    font-size: 0.875rem;
+                    color: #888;
+
+                    span {
+                        background: #f3f4f6;
+                        padding: 2px 8px;
+                        border-radius: 4px;
+                    }
+                }
+            }
+        }
+
+        .add-new-container {
+            text-align: center;
+            margin-top: 1rem;
+        }
+    }
+}
+
+/* Modal Form Styles */
+.common-form-modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem 0;
+
+    .form-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+
+        .section-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            h3 {
+                font-size: 1.1rem;
+                margin: 0;
+            }
+        }
+    }
+
+    .description-list-item {
+        border: 1px solid #eee;
+        padding: 1rem;
+        border-radius: 6px;
+        background: #fafafa;
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+
+            .remove-btn {
+                color: red;
+                background: none;
+                border: none;
+                cursor: pointer;
+            }
+        }
+
+        .form-grid-modal {
+            display: grid;
+            gap: 1rem;
+        }
+    }
+
+    /* Ensure component full width in modal */
+    .forminput,
+    .image-field,
+    .html-editor-container,
+    .textarea-field {
+        width: 100%;
+    }
+}

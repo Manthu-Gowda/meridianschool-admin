@@ -1,32 +1,22 @@
-import BackArrowIcon from "../../assets/icons/pageIcons/BackArrowIcon";
-import PlusIcon from "../../assets/icons/pageIcons/PlusIcon";
-import ButtonComponent from "../ButtonComponent/ButtonComponent";
+import React from "react";
 import PropTypes from "prop-types";
 import "./SubHeader.scss";
-import SearchInput from "../SearchInput/SearchInput";
+import BackArrowIcon from "../../assets/icons/pageIcons/BackArrowIcon";
+import ButtonComponent from "../ButtonComponent/ButtonComponent"; // Assuming you're using your custom ButtonComponent
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const SubHeader = ({
   title,
   showBack = true,
   onBack,
-  showRight = false,
-  buttonText,
-  sticky = true,
+  showRight = true,
+  onEditClick,
+  onDeleteClick,
   divider = true,
   compact = false,
-  onClick, // main button click
-  showPlusIcon = true,
-
-  // search-related props
-  showSearch = false,
-  searchPlaceholder = "Search...",
-  searchValue, // optional controlled value
-  onSearchChange, // optional (fires on every keypress)
-  onSearchDebounced, // optional (debounced)
 }) => {
   const rootClasses = [
     "subheader",
-    sticky ? "subheader--sticky" : "",
     divider ? "subheader--divider" : "",
     compact ? "subheader--compact" : "",
   ]
@@ -52,22 +42,16 @@ const SubHeader = ({
         </div>
       </div>
 
-      {/* RIGHT: Button (optional) */}
+      {/* RIGHT: Edit and Delete buttons */}
       {showRight && (
         <div className="subheader__right">
-          {showSearch && (
-            <div className="subheader__right_search">
-              <SearchInput
-                placeholder={searchPlaceholder}
-                value={searchValue}
-                onChange={onSearchChange}
-                onDebouncedChange={onSearchDebounced}
-              />
-            </div>
-          )}
-          <ButtonComponent variant="main" onClick={onClick}>
-            {showPlusIcon && <PlusIcon />}
-            {buttonText}
+          <ButtonComponent variant="secondary" onClick={onEditClick}>
+            <EditOutlined />
+            Edit
+          </ButtonComponent>
+          <ButtonComponent variant="danger" onClick={onDeleteClick}>
+            <DeleteOutlined />
+            Delete
           </ButtonComponent>
         </div>
       )}
@@ -80,18 +64,10 @@ SubHeader.propTypes = {
   showBack: PropTypes.bool,
   onBack: PropTypes.func,
   showRight: PropTypes.bool,
-  showPlusIcon: PropTypes.bool,
-  buttonText: PropTypes.string,
-  sticky: PropTypes.bool,
+  onEditClick: PropTypes.func, // Optional edit button handler
+  onDeleteClick: PropTypes.func, // Optional delete button handler
   divider: PropTypes.bool,
   compact: PropTypes.bool,
-  onClick: PropTypes.func,
-
-  showSearch: PropTypes.bool,
-  searchPlaceholder: PropTypes.string,
-  searchValue: PropTypes.string,
-  onSearchChange: PropTypes.func,
-  onSearchDebounced: PropTypes.func,
 };
 
 export default SubHeader;
