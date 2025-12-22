@@ -12,6 +12,9 @@ const SubHeader = ({
   showRight = true,
   onEditClick,
   onDeleteClick,
+  primaryActionLabel = "Edit",
+  primaryActionIcon,
+  showDelete = true,
   divider = true,
   compact = false,
 }) => {
@@ -45,14 +48,18 @@ const SubHeader = ({
       {/* RIGHT: Edit and Delete buttons */}
       {showRight && (
         <div className="subheader__right">
-          <ButtonComponent variant="secondary" onClick={onEditClick}>
-            <EditOutlined />
-            Edit
-          </ButtonComponent>
-          <ButtonComponent variant="danger" onClick={onDeleteClick}>
-            <DeleteOutlined />
-            Delete
-          </ButtonComponent>
+          {onEditClick && (
+            <ButtonComponent variant="secondary" onClick={onEditClick}>
+              {primaryActionIcon || <EditOutlined />}
+              {primaryActionLabel}
+            </ButtonComponent>
+          )}
+          {showDelete && onDeleteClick && (
+            <ButtonComponent variant="danger" onClick={onDeleteClick}>
+              <DeleteOutlined />
+              Delete
+            </ButtonComponent>
+          )}
         </div>
       )}
     </div>
@@ -66,6 +73,9 @@ SubHeader.propTypes = {
   showRight: PropTypes.bool,
   onEditClick: PropTypes.func, // Optional edit button handler
   onDeleteClick: PropTypes.func, // Optional delete button handler
+  primaryActionLabel: PropTypes.string,
+  primaryActionIcon: PropTypes.node,
+  showDelete: PropTypes.bool,
   divider: PropTypes.bool,
   compact: PropTypes.bool,
 };

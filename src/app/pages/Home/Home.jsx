@@ -9,19 +9,6 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-
-  /* 
-   Assuming IDs match index + 1 or config:
-   1: Home Banner
-   2: News Bar Content
-   3: Inclusive Community
-   4: Explore Meridian
-   5: Life at Meridian
-   6: Testimonial
-   7: School Events
-   8: Trusted Collaborators
-  */
-
   const handleCardClick = (typeId) => {
     navigate(`/common-form/${typeId}`);
   };

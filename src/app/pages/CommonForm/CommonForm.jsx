@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DatePicker } from "antd";
 import dayjs from "dayjs";
 import "./CommonForm.scss";
@@ -9,7 +9,6 @@ import { contentTypeConfig } from "../../helpers/contentConstant";
 
 // Components
 import InputField from "../../components/InputField/InputField";
-import SelectInput from "../../components/SelectInput/SelectInput";
 import ButtonComponent from "../../components/ButtonComponent/ButtonComponent";
 import ImageUploadField from "../../components/ImageUploadField/ImageUploadField";
 import MultiImageUploadField from "../../components/MultiImageUploadField/MultiImageUploadField";
@@ -18,18 +17,27 @@ import DateField from "../../components/DateField/DateField";
 import DocumentUploadField from "../../components/DocumentUploadField/DocumentUploadField";
 import SubHeader from "../../components/SubHeader/SubHeader";
 import CustomModal from "../../components/CustomModal/CustomModal";
+import { PlusOutlined } from "@ant-design/icons";
+import Loader from "../../components/Loader/Loader";
+import { deleteApi, postApi } from "../../utils/apiService";
+import { ADD_DETAILS, DELETE_DATA, GET_ALL_DETAILS, UPDATE_DETAILS } from "../../utils/apiPath";
+import { errorToast, successToast } from "../../services/ToastHelper";
+import BackArrowIcon from "../../assets/icons/pageIcons/BackArrowIcon";
 
 const { RangePicker } = DatePicker;
 
 const CommonForm = () => {
     const { typeId } = useParams();
-    const navigate = useNavigate();
+      const navigate = useNavigate();
     const [currentConfig, setCurrentConfig] = useState(null);
 
     // Data State
     const [items, setItems] = useState([]); // List of content items
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItemIndex, setEditingItemIndex] = useState(null); // null means adding new
+    const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Form State (for the modal)
     const [formData, setFormData] = useState({});
@@ -77,10 +85,31 @@ const CommonForm = () => {
         minAgeName: "Preview Min Age",
     };
 
+    const formatValue = (value) => {
+        if (value === null || value === undefined || value === "") return "—";
+        return value;
+    };
+
+    const formatDateValue = (value) => {
+        if (!value) return "—";
+        const parsed = dayjs(value);
+        return parsed.isValid() ? parsed.format("YYYY-MM-DD") : "—";
+    };
+
+    const formatDateRangeValue = (range) => {
+        if (!Array.isArray(range) || range.length < 2) return "—";
+        const [start, end] = range;
+        if (!start && !end) return "—";
+        return `${formatDateValue(start)} to ${formatDateValue(end)}`;
+    };
+
     // Initial Form Data Helper
     const getInitialFormData = (config) => ({
         typeId: config.typeId || "",
         typeName: config.typeName || "",
+        blogId: null,
+        blogImageIds: [],
+        blogImageId: null,
         sectionType: null,
         singleImage: "",
         multipleImage: [],
@@ -92,21 +121,153 @@ const CommonForm = () => {
         attachment: null,
         attachmentUrl: "",
         attachmentName: "",
+        attachmentBase64: "",
         year: "",
         month: null,
         dateRange: [null, null],
         minAge: "",
     });
 
-    // Mock Data Generator
-    const generateMockItems = (config) => {
-        // Generate 2 mock items for demonstration
-        return [1, 2].map(i => ({
-            ...getInitialFormData(config),
-            title: `${config.typeName} Item ${i}`,
-            description: `This is a sample description for item ${i}.`,
-            singleImage: "https://via.placeholder.com/150",
+    const normalizeFormData = (data, config) => {
+        const base = getInitialFormData(config);
+        const merged = { ...base, ...data };
+        if (!Array.isArray(merged.multipleImage)) merged.multipleImage = [];
+        if (!Array.isArray(merged.descriptionList)) merged.descriptionList = [];
+        if (!Array.isArray(merged.dateRange)) merged.dateRange = [null, null];
+        if (config.isDescriptionListRequired && merged.descriptionList.length === 0) {
+            merged.descriptionList = [{ header: "", title: "", content: "" }];
+        }
+        return merged;
+    };
+
+    const toNumber = (value) => {
+        const num = Number(value);
+        return Number.isFinite(num) ? num : 0;
+    };
+
+    const stripDataUrlPrefix = (value) => {
+        if (!value) return "";
+        if (typeof value !== "string") return "";
+        if (!value.startsWith("data:")) return value;
+        const commaIndex = value.indexOf(",");
+        return commaIndex >= 0 ? value.slice(commaIndex + 1) : value;
+    };
+
+    const buildPayload = (data, config) => {
+        const descriptionList = (data.descriptionList || []).map((item) => ({
+            title: item.title || item.header || "",
+            description: item.content || "",
         }));
+
+        const multiImages = (data.multipleImage || [])
+            .map((url) => stripDataUrlPrefix(url))
+            .filter(Boolean);
+        const singleImage = stripDataUrlPrefix(data.singleImage);
+        const imageListSource = multiImages.length > 0 ? multiImages : (singleImage ? [singleImage] : []);
+        const imageList = imageListSource.map((url, index) => ({
+            imageId: data.blogImageIds?.[index] || data.blogImageId || null,
+            url,
+        }));
+
+        const payload = {
+            title: data.title || "",
+            subTitle: data.subTitle || "",
+            description: data.description || "",
+            image: "",
+            type: toNumber(config.typeId || data.typeId || 0),
+            metaTitle: data.metaTitle || "",
+            metaDescription: data.metaDescription || "",
+            urlName: data.urlName || "",
+            imageList,
+            descriptionList,
+            date: data.date ? dayjs(data.date).toISOString() : null,
+            urlLink: attachmentMode === "url" ? data.attachmentUrl || "" : "",
+            uploadDocument: attachmentMode === "file" ? data.attachmentBase64 || "" : "",
+            year: toNumber(data.year),
+            month: data.month || "",
+            fromDate: data.dateRange?.[0] ? dayjs(data.dateRange[0]).toISOString() : null,
+            toDate: data.dateRange?.[1] ? dayjs(data.dateRange[1]).toISOString() : null,
+            minAge: toNumber(data.minAge),
+            descriptionListHeader: data.descriptionList?.[0]?.header || "",
+        };
+
+        if (data.blogId) {
+            payload.blogId = data.blogId;
+        }
+
+        return payload;
+    };
+
+    const resolveInitialItems = (config) => {
+        return [];
+    };
+
+    const buildAbsoluteUrl = (path) => {
+        if (!path) return "";
+        if (path.startsWith("http://") || path.startsWith("https://")) return path;
+        const base = import.meta.env.VITE_REACT_APP_API_URL || "";
+        if (!base) return path;
+        return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+    };
+
+    const mapApiItemToForm = (item, config) => {
+        const imageUrls = (item.imageList || []).map((img) => buildAbsoluteUrl(img.url)).filter(Boolean);
+        const fallbackImage = item.image ? buildAbsoluteUrl(item.image) : "";
+
+        const mapped = {
+            ...getInitialFormData(config),
+            blogId: item.blogId || null,
+            blogImageIds: (item.imageList || []).map((img) => img.imageId).filter(Boolean),
+            blogImageId: item.imageList?.[0]?.imageId || null,
+            title: item.title || "",
+            subTitle: item.subTitle || "",
+            description: item.description || "",
+            singleImage: imageUrls.length <= 1 ? (imageUrls[0] || fallbackImage) : fallbackImage,
+            multipleImage: imageUrls.length > 1 ? imageUrls : [],
+            descriptionList: (item.descriptionList || []).map((desc) => ({
+                header: item.descriptionListHeader || "",
+                title: desc.title || "",
+                content: desc.description || "",
+            })),
+            date: item.date ? dayjs(item.date) : null,
+            attachmentName: item.uploadDocument || "",
+            attachmentUrl: item.urlLink || "",
+            year: item.year ?? "",
+            month: item.month || "",
+            dateRange: [
+                item.fromDate ? dayjs(item.fromDate) : null,
+                item.toDate ? dayjs(item.toDate) : null,
+            ],
+            minAge: item.minAge ?? "",
+            metaTitle: item.metaTitle || "",
+            metaDescription: item.metaDescription || "",
+            urlName: item.urlName || "",
+        };
+
+        return normalizeFormData(mapped, config);
+    };
+
+    const fetchItems = async (config) => {
+        if (!config?.typeId) return;
+        setIsLoading(true);
+        const payload = { pageIndex: 0, pageSize: 10, searchString: "" };
+        const params = { params: { type: config.typeId } };
+        const { statusCode, data, message, error } = await postApi(GET_ALL_DETAILS, payload, params);
+
+        if (statusCode === 200) {
+            const list = Array.isArray(data) ? data : data?.data || [];
+            if (list.length === 0) {
+                setItems(resolveInitialItems(config));
+            } else if (!config.isSectionTypeListRequired) {
+                setItems([mapApiItemToForm(list[0], config)]);
+            } else {
+                setItems(list.map((item) => mapApiItemToForm(item, config)));
+            }
+        } else {
+            setItems(resolveInitialItems(config));
+            errorToast(message || error || "Failed to load details");
+        }
+        setIsLoading(false);
     };
 
     // Load Config
@@ -120,13 +281,24 @@ const CommonForm = () => {
 
         if (config) {
             setCurrentConfig(config);
-            // Load mock items if it's a list type, or just one item if single
-            // For now assuming all are lists as per user request
-            setItems(generateMockItems(config));
+            if (typeId) {
+                fetchItems(config);
+            } else {
+                setItems(resolveInitialItems(config));
+            }
         } else {
             console.error("Config not found");
         }
     }, [typeId]);
+
+    const openModalWithData = (data, index = null) => {
+        if (!currentConfig) return;
+        const normalized = normalizeFormData(data, currentConfig);
+        setEditingItemIndex(index);
+        setFormData(normalized);
+        setAttachmentMode(normalized.attachmentUrl ? "url" : "file");
+        setIsModalOpen(true);
+    };
 
     // Handlers for Form Input
     const handleChange = (e) => {
@@ -152,11 +324,37 @@ const CommonForm = () => {
     };
 
     const handleDocumentChange = (file) => {
-        setFormData((prev) => ({
-            ...prev,
-            attachment: file,
-            attachmentName: file ? file.name : ""
-        }));
+        if (!file) {
+            setFormData((prev) => ({
+                ...prev,
+                attachment: null,
+                attachmentName: "",
+                attachmentBase64: "",
+            }));
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const dataUrl = reader.result;
+            const base64 = stripDataUrlPrefix(dataUrl);
+            setFormData((prev) => ({
+                ...prev,
+                attachment: file,
+                attachmentName: file.name || "",
+                attachmentBase64: base64,
+            }));
+        };
+        reader.onerror = () => {
+            errorToast("Failed to read document");
+            setFormData((prev) => ({
+                ...prev,
+                attachment: null,
+                attachmentName: "",
+                attachmentBase64: "",
+            }));
+        };
+        reader.readAsDataURL(file);
     };
 
     // Description List Actions
@@ -184,30 +382,76 @@ const CommonForm = () => {
 
     // Edit/Delete Handlers
     const handleEdit = (index) => {
-        setEditingItemIndex(index);
-        setFormData({ ...items[index] }); // Load item data into form
-        setIsModalOpen(true);
+        openModalWithData(items[index], index);
     };
 
-    const handleDelete = (index) => {
+    const getDeleteBlogImageId = (item) => {
+        if (item?.blogImageId) return item.blogImageId;
+        if (Array.isArray(item?.blogImageIds) && item.blogImageIds.length > 0) {
+            return item.blogImageIds[0];
+        }
+        return null;
+    };
+
+    const handleDelete = async (index) => {
         if (window.confirm("Are you sure you want to delete this item?")) {
-            setItems(prev => prev.filter((_, i) => i !== index));
+            const targetItem = items[index];
+            const blogImageId = getDeleteBlogImageId(targetItem);
+            if (!blogImageId) {
+                errorToast("Missing blog image id for delete");
+                return;
+            }
+            setIsDeleting(true);
+            const { statusCode, message, error } = await deleteApi(
+                DELETE_DATA,
+                { params: { blogImageId } }
+            );
+
+            if (statusCode === 200) {
+                successToast(message || "Deleted successfully");
+                if (typeId && currentConfig) {
+                    await fetchItems(currentConfig);
+                } else {
+                    setItems(prev => prev.filter((_, i) => i !== index));
+                }
+            } else {
+                errorToast(message || error || "Failed to delete");
+            }
+            setIsDeleting(false);
         }
     };
 
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        // Save logic: update items array
-        setItems(prev => {
-            const newItems = [...prev];
-            if (editingItemIndex !== null && editingItemIndex >= 0) {
-                newItems[editingItemIndex] = formData;
+        if (!currentConfig) return;
+        setIsSaving(true);
+        const payload = buildPayload(formData, currentConfig);
+        const apiUrl = payload.blogId ? UPDATE_DETAILS : ADD_DETAILS;
+        const { statusCode, message, error } = await postApi(apiUrl, payload);
+
+        if (statusCode === 200) {
+            setIsModalOpen(false);
+            successToast(message || "Saved successfully");
+            if (typeId) {
+                await fetchItems(currentConfig);
             } else {
-                newItems.push(formData);
+                setItems(prev => {
+                    const newItems = [...prev];
+                    if (!currentConfig.isSectionTypeListRequired) {
+                        return [formData];
+                    }
+                    if (editingItemIndex !== null && editingItemIndex >= 0) {
+                        newItems[editingItemIndex] = formData;
+                    } else {
+                        newItems.push(formData);
+                    }
+                    return newItems;
+                });
             }
-            return newItems;
-        });
-        setIsModalOpen(false);
+        } else {
+            errorToast(message || error || "Failed to save");
+        }
+        setIsSaving(false);
     };
 
     // Render View (Read-Only)
@@ -215,29 +459,128 @@ const CommonForm = () => {
         return (
             <div className="item-view-content">
                 {/* Image */}
-                {(currentConfig.isSingleImageRequired && item.singleImage) && (
+                {currentConfig.isSingleImageRequired && (
                     <div className="view-row">
-                        <img src={item.singleImage} alt="Preview" className="view-image-preview" />
+                        {item.singleImage ? (
+                            <img src={item.singleImage} alt="Preview" className="view-image-preview" />
+                        ) : (
+                            <div className="view-empty">No image uploaded</div>
+                        )}
                     </div>
                 )}
-                {(currentConfig.isMultipleImageRequired && item.multipleImage?.length > 0) && (
-                    <div className="view-row gallery-row">
-                        {item.multipleImage.map((img, idx) => (
-                            <img key={idx} src={img} alt="Preview" className="view-image-preview small" />
-                        ))}
-                    </div>
+                {currentConfig.isMultipleImageRequired && (
+                    item.multipleImage?.length > 0 ? (
+                        <div className="view-row gallery-row">
+                            {item.multipleImage.map((img, idx) => (
+                                <img key={idx} src={img} alt="Preview" className="view-image-preview small" />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="view-row">
+                            <div className="view-empty">No images uploaded</div>
+                        </div>
+                    )
                 )}
 
-                {/* Text */}
-                {currentConfig.isTitleRequired && item.title && <h3>{item.title}</h3>}
-                {currentConfig.isSubTitleRequired && item.subTitle && <h4>{item.subTitle}</h4>}
-                {currentConfig.isDescriptionRequired && item.description && <p className="description-text">{item.description}</p>}
-
-                {/* Meta */}
-                <div className="meta-tags">
-                    {item.date && <span>Date: {dayjs(item.date).format("YYYY-MM-DD")}</span>}
-                    {item.year && <span>Year: {item.year}</span>}
-                    {item.minAge && <span>Min Age: {item.minAge}</span>}
+                <div className="view-fields">
+                    {currentConfig.isTitleRequired && (
+                        <div className="view-field">
+                            <span className="view-label">{currentConfig.titleName || "Title"}</span>
+                            <span className="view-value">{formatValue(item.title)}</span>
+                        </div>
+                    )}
+                    {currentConfig.isSubTitleRequired && (
+                        <div className="view-field">
+                            <span className="view-label">{currentConfig.subTitleName || "Sub Title"}</span>
+                            <span className="view-value">{formatValue(item.subTitle)}</span>
+                        </div>
+                    )}
+                    {currentConfig.isDescriptionRequired && (
+                        <div className="view-field">
+                            <span className="view-label">{currentConfig.descriptionName || "Description"}</span>
+                            <p className="description-text">{formatValue(item.description)}</p>
+                        </div>
+                    )}
+                    {currentConfig.isDescriptionListRequired && (
+                        <div className="view-field">
+                            <span className="view-label">List Items</span>
+                            {item.descriptionList?.length > 0 ? (
+                                <div className="view-list">
+                                    {item.descriptionList.map((listItem, idx) => (
+                                        <div key={idx} className="view-list-item">
+                                            <div className="view-list-title">Item #{idx + 1}</div>
+                                            {currentConfig.isDescriptionListHeaderRequired && (
+                                                <div className="view-subfield">
+                                                    <span className="view-sub-label">{currentConfig.descriptionListHeaderName || "Header"}:</span>
+                                                    <span className="view-sub-value">{formatValue(listItem.header)}</span>
+                                                </div>
+                                            )}
+                                            {currentConfig.isDescriptionListTitleRequired && (
+                                                <div className="view-subfield">
+                                                    <span className="view-sub-label">{currentConfig.descriptionListTitleName || "Title"}:</span>
+                                                    <span className="view-sub-value">{formatValue(listItem.title)}</span>
+                                                </div>
+                                            )}
+                                            {currentConfig.isDescriptionListContentRequired && (
+                                                <div className="view-subfield">
+                                                    <span className="view-sub-label">{currentConfig.descriptionListContentName || "Content"}:</span>
+                                                    <span className="view-sub-value">{formatValue(listItem.content)}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <span className="view-value">—</span>
+                            )}
+                        </div>
+                    )}
+                    {(currentConfig.isDateRequired || currentConfig.isDateRangeRequired || currentConfig.isYearRequired || currentConfig.isMonthRequired || currentConfig.isMinAgeRequired || currentConfig.isAttachmentRequired) && (
+                        <div className="view-meta">
+                            {currentConfig.isDateRequired && (
+                                <div className="view-field">
+                                    <span className="view-label">{currentConfig.dateName || "Date"}</span>
+                                    <span className="view-value">{formatDateValue(item.date)}</span>
+                                </div>
+                            )}
+                            {currentConfig.isDateRangeRequired && (
+                                <div className="view-field">
+                                    <span className="view-label">{currentConfig.dateRangeName || "Date Range"}</span>
+                                    <span className="view-value">{formatDateRangeValue(item.dateRange)}</span>
+                                </div>
+                            )}
+                            {currentConfig.isYearRequired && (
+                                <div className="view-field">
+                                    <span className="view-label">{currentConfig.yearName || "Year"}</span>
+                                    <span className="view-value">{formatValue(item.year)}</span>
+                                </div>
+                            )}
+                            {currentConfig.isMonthRequired && (
+                                <div className="view-field">
+                                    <span className="view-label">{currentConfig.monthName || "Month"}</span>
+                                    <span className="view-value">{formatValue(item.month)}</span>
+                                </div>
+                            )}
+                            {currentConfig.isMinAgeRequired && (
+                                <div className="view-field">
+                                    <span className="view-label">{currentConfig.minAgeName || "Min Age"}</span>
+                                    <span className="view-value">{formatValue(item.minAge)}</span>
+                                </div>
+                            )}
+                            {currentConfig.isAttachmentRequired && (
+                                <div className="view-field">
+                                    <span className="view-label">{currentConfig.attachementName || "Attachment"}</span>
+                                    <span className="view-value">
+                                        {formatValue(
+                                            item.attachmentUrl ||
+                                            item.attachmentName ||
+                                            item.attachment?.name
+                                        )}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -245,13 +588,45 @@ const CommonForm = () => {
 
     if (!currentConfig) return <div className="p-4">Loading...</div>;
 
+    const onBack = () => {
+            navigate(-1);
+    };
+
     return (
         <div className="common-form-page">
+            {isLoading && <Loader />}
+            {isSaving && <Loader />}
+            {isDeleting && <Loader />}
             <div className="form-header">
+                 <button
+              type="button"
+              className="subheader__back"
+              aria-label="Go back"
+              onClick={onBack}
+            >
+              <BackArrowIcon />
+            </button>
                 <h1>{currentConfig.typeName}</h1>
             </div>
 
             <div className="items-list">
+                {items.length === 0 && (
+                    <div className="content-item-card">
+                        <SubHeader
+                            title={currentConfig.typeName}
+                            showBack={false}
+                            showRight={true}
+                            onEditClick={() => openModalWithData(getInitialFormData(currentConfig))}
+                            primaryActionLabel="Add"
+                            primaryActionIcon={<PlusOutlined />}
+                            showDelete={false}
+                            compact={true}
+                        />
+                        <div className="item-view-content">
+                            <p className="no-items">No items found.</p>
+                        </div>
+                    </div>
+                )}
                 {items.map((item, index) => (
                     <div key={index} className="content-item-card">
                         <SubHeader
@@ -260,22 +635,22 @@ const CommonForm = () => {
                             showRight={true}
                             onEditClick={() => handleEdit(index)}
                             onDeleteClick={() => handleDelete(index)}
+                            showDelete={currentConfig.isSectionTypeListRequired}
                             compact={true}
                         />
                         {renderItemView(item)}
                     </div>
                 ))}
-                {items.length === 0 && <p className="no-items">No items found.</p>}
 
-                <div className="add-new-container">
-                    <ButtonComponent onClick={() => {
-                        setEditingItemIndex(null);
-                        setFormData(getInitialFormData(currentConfig));
-                        setIsModalOpen(true);
-                    }}>
-                        + Add New {currentConfig.typeName}
-                    </ButtonComponent>
-                </div>
+                {items.length > 0 && currentConfig.isSectionTypeListRequired && (
+                    <div className="add-new-container">
+                        <ButtonComponent onClick={() => {
+                            openModalWithData(getInitialFormData(currentConfig));
+                        }}>
+                            + Add New {currentConfig.typeName}
+                        </ButtonComponent>
+                    </div>
+                )}
             </div>
 
             {/* Edit/Add Modal */}

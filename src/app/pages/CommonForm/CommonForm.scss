@@ -1,11 +1,14 @@
 @use "../../globalStyles" as *;
 .common-form-page {
-    padding: 2rem;
-    background-color: #f9fafb;
-    min-height: 100vh;
+    padding: 15px;
+    // background-color: #f9fafb;
+    // min-height: 100vh;
+    border-radius: 10px;
 
     .form-header {
         margin-bottom: 2rem;
+        display: flex;
+        gap: 10px;
 
         h1 {
             font-size: 1.8rem;
@@ -70,18 +73,75 @@
                     line-height: 1.5;
                 }
 
-                .meta-tags {
-                    margin-top: 1rem;
-                    display: flex;
-                    gap: 1rem;
-                    font-size: 0.875rem;
-                    color: #888;
+                .view-empty {
+                    color: #9ca3af;
+                    font-style: italic;
+                }
 
-                    span {
-                        background: #f3f4f6;
-                        padding: 2px 8px;
-                        border-radius: 4px;
-                    }
+                .view-fields {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    margin-top: 0.5rem;
+                }
+
+                .view-field {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.25rem;
+                }
+
+                .view-label {
+                    font-size: 0.85rem;
+                    color: #6b7280;
+                }
+
+                .view-value {
+                    color: #111827;
+                }
+
+                .view-meta {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+
+                .view-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.75rem;
+                    background: #f9fafb;
+                    border: 1px solid #eef2f7;
+                    border-radius: 6px;
+                    padding: 0.75rem;
+                }
+
+                .view-list-item {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.35rem;
+                }
+
+                .view-list-title {
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    color: #374151;
+                }
+
+                .view-subfield {
+                    display: flex;
+                    gap: 6px;
+                    align-items: baseline;
+                    flex-wrap: wrap;
+                }
+
+                .view-sub-label {
+                    color: #6b7280;
+                    font-size: 0.82rem;
+                }
+
+                .view-sub-value {
+                    color: #111827;
                 }
             }
         }
