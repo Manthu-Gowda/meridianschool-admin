@@ -182,8 +182,10 @@ const MultiImageUploadField = ({
     });
   };
 
+  const showError = internalError || errorText;
+
   return (
-    <div className={`image-upload-field ${internalError ? "has-error" : ""}`}>
+    <div className={`image-upload-field ${showError ? "has-error" : ""}`}>
       {title && <span className="input-label">{title}</span>}
 
       {/* File input */}
@@ -212,7 +214,7 @@ const MultiImageUploadField = ({
         ))}
       </div>
 
-      {internalError && <span className="input-error-text">{internalError}</span>}
+      {showError && <span className="input-error-text">{showError}</span>}
 
       {/* Crop Modal */}
       {cropEnabled && isCropOpen && rawImageUrl && (

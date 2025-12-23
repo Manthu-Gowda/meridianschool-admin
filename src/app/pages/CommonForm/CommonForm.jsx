@@ -41,6 +41,7 @@ const CommonForm = () => {
 
     // Form State (for the modal)
     const [formData, setFormData] = useState({});
+    const [errors, setErrors] = useState({});
 
     // UI State
     const [attachmentMode, setAttachmentMode] = useState("file"); // "file" | "url"
@@ -297,6 +298,7 @@ const CommonForm = () => {
         setEditingItemIndex(index);
         setFormData(normalized);
         setAttachmentMode(normalized.attachmentUrl ? "url" : "file");
+        setErrors({});
         setIsModalOpen(true);
     };
 
@@ -304,23 +306,28 @@ const CommonForm = () => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const handleSelectChange = (name, value) => {
         setFormData((prev) => ({ ...prev, [name]: value }));
+        setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const handleImageChange = (key) => (file, dataUrl) => {
         // if key is multipleImage, dataUrl is array
         setFormData((prev) => ({ ...prev, [key]: dataUrl }));
+        setErrors((prev) => ({ ...prev, [key]: "" }));
     };
 
     const handleDateChange = (date, dateString) => {
         setFormData((prev) => ({ ...prev, date: date }));
+        setErrors((prev) => ({ ...prev, date: "" }));
     };
 
     const handleDateRangeChange = (dates) => {
         setFormData((prev) => ({ ...prev, dateRange: dates }));
+        setErrors((prev) => ({ ...prev, dateRange: "" }));
     };
 
     const handleDocumentChange = (file) => {
@@ -331,6 +338,7 @@ const CommonForm = () => {
                 attachmentName: "",
                 attachmentBase64: "",
             }));
+            setErrors((prev) => ({ ...prev, attachment: "" }));
             return;
         }
 
@@ -344,6 +352,7 @@ const CommonForm = () => {
                 attachmentName: file.name || "",
                 attachmentBase64: base64,
             }));
+            setErrors((prev) => ({ ...prev, attachment: "" }));
         };
         reader.onerror = () => {
             errorToast("Failed to read document");
@@ -353,6 +362,7 @@ const CommonForm = () => {
                 attachmentName: "",
                 attachmentBase64: "",
             }));
+            setErrors((prev) => ({ ...prev, attachment: "Failed to read document" }));
         };
         reader.readAsDataURL(file);
     };
@@ -363,6 +373,7 @@ const CommonForm = () => {
             ...prev,
             descriptionList: [...prev.descriptionList, { header: "", title: "", content: "" }]
         }));
+        setErrors((prev) => ({ ...prev, descriptionList: "" }));
     };
 
     const removeDescriptionListItem = (index) => {
@@ -370,6 +381,12 @@ const CommonForm = () => {
             ...prev,
             descriptionList: prev.descriptionList.filter((_, i) => i !== index)
         }));
+        setErrors((prev) => {
+            if (!prev.descriptionListItems) return prev;
+            const updated = { ...prev.descriptionListItems };
+            delete updated[index];
+            return { ...prev, descriptionListItems: updated };
+        });
     };
 
     const handleDescriptionListChange = (index, field, value) => {
@@ -377,6 +394,12 @@ const CommonForm = () => {
             const newList = [...prev.descriptionList];
             newList[index] = { ...newList[index], [field]: value };
             return { ...prev, descriptionList: newList };
+        });
+        setErrors((prev) => {
+            if (!prev.descriptionListItems || !prev.descriptionListItems[index]) return prev;
+            const updated = { ...prev.descriptionListItems };
+            updated[index] = { ...updated[index], [field]: "" };
+            return { ...prev, descriptionListItems: updated };
         });
     };
 
@@ -421,9 +444,87 @@ const CommonForm = () => {
         }
     };
 
+    const validateForm = () => {
+        if (!currentConfig) return false;
+        const nextErrors = {};
+        const isEmpty = (value) =>
+            value === null || value === undefined || value === "";
+
+        if (currentConfig.isSingleImageRequired && !formData.singleImage) {
+            nextErrors.singleImage = "This field is required";
+        }
+        if (currentConfig.isMultipleImageRequired && (!formData.multipleImage || formData.multipleImage.length === 0)) {
+            nextErrors.multipleImage = "Please upload at least one image";
+        }
+        if (currentConfig.isTitleRequired && !formData.title?.trim()) {
+            nextErrors.title = "This field is required";
+        }
+        if (currentConfig.isSubTitleRequired && !formData.subTitle?.trim()) {
+            nextErrors.subTitle = "This field is required";
+        }
+        if (currentConfig.isDescriptionRequired && !formData.description?.trim()) {
+            nextErrors.description = "This field is required";
+        }
+        if (currentConfig.isDateRequired && !formData.date) {
+            nextErrors.date = "This field is required";
+        }
+        if (currentConfig.isYearRequired && isEmpty(formData.year)) {
+            nextErrors.year = "This field is required";
+        }
+        if (currentConfig.isMonthRequired && !formData.month) {
+            nextErrors.month = "This field is required";
+        }
+        if (currentConfig.isDateRangeRequired) {
+            const [fromDate, toDate] = formData.dateRange || [];
+            if (!fromDate || !toDate) {
+                nextErrors.dateRange = "Please select a date range";
+            }
+        }
+        if (currentConfig.isMinAgeRequired && isEmpty(formData.minAge)) {
+            nextErrors.minAge = "This field is required";
+        }
+        if (currentConfig.isAttachmentRequired) {
+            if (attachmentMode === "file" && !formData.attachmentBase64) {
+                nextErrors.attachment = "Please upload a document";
+            }
+            if (attachmentMode === "url" && !formData.attachmentUrl?.trim()) {
+                nextErrors.attachmentUrl = "Please enter a URL";
+            }
+        }
+        if (currentConfig.isDescriptionListRequired) {
+            if (!formData.descriptionList || formData.descriptionList.length === 0) {
+                nextErrors.descriptionList = "Please add at least one item";
+            } else {
+                const itemErrors = {};
+                formData.descriptionList.forEach((item, index) => {
+                    const entry = {};
+                    if (currentConfig.isDescriptionListHeaderRequired && !item.header?.trim()) {
+                        entry.header = "This field is required";
+                    }
+                    if (currentConfig.isDescriptionListTitleRequired && !item.title?.trim()) {
+                        entry.title = "This field is required";
+                    }
+                    if (currentConfig.isDescriptionListContentRequired && !item.content?.trim()) {
+                        entry.content = "This field is required";
+                    }
+                    if (Object.keys(entry).length > 0) {
+                        itemErrors[index] = entry;
+                    }
+                });
+                if (Object.keys(itemErrors).length > 0) {
+                    nextErrors.descriptionListItems = itemErrors;
+                }
+            }
+        }
+
+        setErrors(nextErrors);
+        return Object.keys(nextErrors).length === 0;
+    };
+
     const handleSave = async (e) => {
         e.preventDefault();
         if (!currentConfig) return;
+        if (!validateForm()) return;
         setIsSaving(true);
         const payload = buildPayload(formData, currentConfig);
         const apiUrl = payload.blogId ? UPDATE_DETAILS : ADD_DETAILS;
@@ -676,6 +777,7 @@ const CommonForm = () => {
                                     value={formData.singleImage}
                                     onChange={handleImageChange("singleImage")}
                                     cropEnabled={currentConfig.isSingleImageCroperRequired}
+                                    errorText={errors.singleImage}
                                     aspectRatio={(() => {
                                         if (!currentConfig.singleImageCropRatio) return 1;
                                         const [w, h] = currentConfig.singleImageCropRatio.split(":").map(Number);
@@ -691,6 +793,7 @@ const CommonForm = () => {
                                     value={formData.multipleImage}
                                     onChange={handleImageChange("multipleImage")}
                                     cropEnabled={currentConfig.isMultipleImageCroperRequired}
+                                    errorText={errors.multipleImage}
                                 />
                             )}
                         </div>
@@ -700,19 +803,21 @@ const CommonForm = () => {
                     {(currentConfig.isTitleRequired || currentConfig.isSubTitleRequired || currentConfig.isDescriptionRequired) && (
                         <div className="form-section">
                             {currentConfig.isTitleRequired && (
-                                <InputField
-                                    title={currentConfig.titleName || "Title"}
-                                    name="title"
-                                    value={formData.title}
-                                    onChange={handleChange}
-                                />
-                            )}
+                                    <InputField
+                                        title={currentConfig.titleName || "Title"}
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        errorText={errors.title}
+                                    />
+                                )}
                             {currentConfig.isSubTitleRequired && (
                                 <InputField
                                     title={currentConfig.subTitleName || "Sub Title"}
                                     name="subTitle"
                                     value={formData.subTitle}
                                     onChange={handleChange}
+                                    errorText={errors.subTitle}
                                 />
                             )}
                             {currentConfig.isDescriptionRequired && (
@@ -722,6 +827,7 @@ const CommonForm = () => {
                                         name="description"
                                         value={formData.description}
                                         onChange={handleChange}
+                                        errorText={errors.description}
                                         rows={6}
                                     />
                                 </div>
@@ -738,6 +844,9 @@ const CommonForm = () => {
                                     + Add Item
                                 </ButtonComponent>
                             </div>
+                            {errors.descriptionList && (
+                                <span className="input-error-text">{errors.descriptionList}</span>
+                            )}
                             {formData.descriptionList?.map((item, index) => (
                                 <div key={index} className="description-list-item">
                                     <div className="item-header">
@@ -750,6 +859,7 @@ const CommonForm = () => {
                                                 title={currentConfig.descriptionListHeaderName || "Header"}
                                                 value={item.header}
                                                 onChange={(e) => handleDescriptionListChange(index, "header", e.target.value)}
+                                                errorText={errors.descriptionListItems?.[index]?.header}
                                             />
                                         )}
                                         {currentConfig.isDescriptionListTitleRequired && (
@@ -757,6 +867,7 @@ const CommonForm = () => {
                                                 title={currentConfig.descriptionListTitleName || "Title"}
                                                 value={item.title}
                                                 onChange={(e) => handleDescriptionListChange(index, "title", e.target.value)}
+                                                errorText={errors.descriptionListItems?.[index]?.title}
                                             />
                                         )}
                                         {currentConfig.isDescriptionListContentRequired && (
@@ -764,6 +875,7 @@ const CommonForm = () => {
                                                 title={currentConfig.descriptionListContentName || "Content"}
                                                 value={item.content}
                                                 onChange={(e) => handleDescriptionListChange(index, "content", e.target.value)}
+                                                errorText={errors.descriptionListItems?.[index]?.content}
                                                 rows={2}
                                             />
                                         )}
@@ -776,25 +888,27 @@ const CommonForm = () => {
                     {/* Dates & Meta */}
                     {(currentConfig.isDateRequired || currentConfig.isDateRangeRequired || currentConfig.isYearRequired || currentConfig.isMonthRequired || currentConfig.isMinAgeRequired || currentConfig.isAttachmentRequired) && (
                         <div className="form-section">
-                            {currentConfig.isDateRequired && <DateField title={currentConfig.dateName} value={formData.date} onChange={handleDateChange} />}
-                            {currentConfig.isYearRequired && <InputField title={currentConfig.yearName} name="year" type="number" value={formData.year} onChange={handleChange} />}
-                            {currentConfig.isMinAgeRequired && <InputField title={currentConfig.minAgeName} name="minAge" type="number" value={formData.minAge} onChange={handleChange} />}
+                            {currentConfig.isDateRequired && <DateField title={currentConfig.dateName} value={formData.date} onChange={handleDateChange} errorText={errors.date} />}
+                            {currentConfig.isYearRequired && <InputField title={currentConfig.yearName} name="year" type="number" value={formData.year} onChange={handleChange} errorText={errors.year} />}
+                            {currentConfig.isMonthRequired && <InputField title={currentConfig.monthName} name="month" value={formData.month} onChange={handleChange} errorText={errors.month} />}
+                            {currentConfig.isMinAgeRequired && <InputField title={currentConfig.minAgeName} name="minAge" type="number" value={formData.minAge} onChange={handleChange} errorText={errors.minAge} />}
                             {currentConfig.isDateRangeRequired && (
                                 <div className="forminput">
                                     <span className="input-label">{currentConfig.dateRangeName}</span>
                                     <RangePicker value={formData.dateRange} onChange={handleDateRangeChange} />
+                                    {errors.dateRange && <span className="input-error-text">{errors.dateRange}</span>}
                                 </div>
                             )}
                             {currentConfig.isAttachmentRequired && (
                                 <div className="attachment-block">
                                     <span className="input-label">{currentConfig.attachementName}</span>
                                     <div className="attachment-type-toggle">
-                                        <label><input type="radio" checked={attachmentMode === "file"} onChange={() => setAttachmentMode("file")} /> File</label>
-                                        <label><input type="radio" checked={attachmentMode === "url"} onChange={() => setAttachmentMode("url")} /> URL</label>
+                                        <label><input type="radio" checked={attachmentMode === "file"} onChange={() => { setAttachmentMode("file"); setErrors((prev) => ({ ...prev, attachmentUrl: "" })); }} /> File</label>
+                                        <label><input type="radio" checked={attachmentMode === "url"} onChange={() => { setAttachmentMode("url"); setErrors((prev) => ({ ...prev, attachment: "" })); }} /> URL</label>
                                     </div>
                                     {attachmentMode === "file" ?
-                                        <DocumentUploadField fileName={formData.attachmentName} onChange={handleDocumentChange} /> :
-                                        <InputField name="attachmentUrl" value={formData.attachmentUrl} onChange={handleChange} placeholder="URL" />
+                                        <DocumentUploadField fileName={formData.attachmentName} onChange={handleDocumentChange} errorText={errors.attachment} /> :
+                                        <InputField name="attachmentUrl" value={formData.attachmentUrl} onChange={handleChange} placeholder="URL" errorText={errors.attachmentUrl} />
                                     }
                                 </div>
                             )}
