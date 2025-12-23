@@ -88,7 +88,7 @@ const ImageUploadField = ({
   }, []);
 
   // 👉 Helper to actually crop the image in a canvas and return base64
-  const getCroppedImg = (imageSrc, pixelCrop, mimeType = "image/jpeg") => {
+  const getCroppedImg = (imageSrc, pixelCrop, quality = 0.82) => {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.crossOrigin = "anonymous";
@@ -112,7 +112,7 @@ const ImageUploadField = ({
           pixelCrop.height
         );
 
-        const dataUrl = canvas.toDataURL(mimeType, 0.92);
+        const dataUrl = canvas.toDataURL("image/webp", quality);
         resolve(dataUrl);
       };
 
@@ -122,24 +122,24 @@ const ImageUploadField = ({
     });
   };
 
+  const toWebpFileName = (name) => {
+    if (!name) return "cropped-image.webp";
+    return name.replace(/\.[^.]+$/, ".webp");
+  };
+
   const handleApplyCrop = async () => {
     if (!rawImageUrl || !croppedAreaPixels) return;
 
     try {
-      const mime =
-        (rawFile?.type && rawFile.type.startsWith("image/") && rawFile.type) ||
-        "image/jpeg";
-
       const croppedDataUrl = await getCroppedImg(
         rawImageUrl,
-        croppedAreaPixels,
-        mime
+        croppedAreaPixels
       );
 
       // 🔁 Optionally create a new File from the cropped data (if you ever need it)
       const croppedFile = await dataURLToFile(
         croppedDataUrl,
-        rawFile?.name || "cropped-image.jpg"
+        toWebpFileName(rawFile?.name)
       );
 
       // Notify parent with cropped image
