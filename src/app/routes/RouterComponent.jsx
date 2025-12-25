@@ -2,50 +2,50 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "../components/MainLayout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import Login from "../pages/Login/Login";
-import Home from "../pages/Home/Home";
+import Home from "../pages/Home";
 
 // About pages
-import AboutUs from "../pages/About/AboutUs/AboutUs";
-import VisionMission from "../pages/About/VisionMission/VisionMission";
-import Leadership from "../pages/About/Leadership/Leadership";
-import Awards from "../pages/About/Awards/Awards";
-import MandatoryDisclosure from "../pages/About/MandatoryDisclosure/MandatoryDisclosure";
-import Testimonials from "../pages/About/Testimonials/Testimonials";
+import AboutUs from "../pages/About/AboutUs";
+import VisionMission from "../pages/About/VisionMission";
+import Leadership from "../pages/About/Leadership";
+import Awards from "../pages/About/Awards";
+import MandatoryDisclosure from "../pages/About/MandatoryDisclosure";
+import Testimonials from "../pages/About/Testimonials";
 
 // Academics
-import AcademicsOverview from "../pages/Academics/AcademicsOverview/AcademicsOverview";
-import TeachingStyle from "../pages/Academics/TeachingStyle/TeachingStyle";
-import ExperiencedFaculty from "../pages/Academics/ExperiencedFaculty/ExperiencedFaculty";
-import AcademicsFAQ from "../pages/Academics/AcademicsFAQ/AcademicsFAQ";
-import Newsletter from "../pages/Academics/Newsletter/Newsletter";
-import AcademicDoc from "../pages/Academics/AcademicDoc/AcademicDoc";
-import Training from "../pages/Academics/Training/Training";
-import SeniorSecondary from "../pages/Academics/SeniorSecondary/SeniorSecondary";
-import CurriculumSupportProgram from "../pages/Academics/CurriculumSupportProgram/CurriculumSupportProgram";
+import AcademicsOverview from "../pages/Academics/AcademicsOverview";
+import TeachingStyle from "../pages/Academics/TeachingStyle";
+import ExperiencedFaculty from "../pages/Academics/ExperiencedFaculty";
+import AcademicsFAQ from "../pages/Academics/AcademicsFAQ";
+import Newsletter from "../pages/Academics/Newsletter";
+import AcademicDoc from "../pages/Academics/AcademicDoc";
+import Training from "../pages/Academics/Training";
+import SeniorSecondary from "../pages/Academics/SeniorSecondary";
+import CurriculumSupportProgram from "../pages/Academics/CurriculumSupportProgram";
 
 // Beyond Academics
-import BeyondSports from "../pages/BeyondAcademics/BeyondSports/BeyondSports";
-import ClubsActivities from "../pages/BeyondAcademics/ClubsActivities/ClubsActivities";
-import MessMenu from "../pages/BeyondAcademics/MessMenu/MessMenu";
-import TransportSOP from "../pages/BeyondAcademics/TransportSOP/TransportSOP";
-import StudentCorner from "../pages/BeyondAcademics/StudentCorner/StudentCorner";
-import StudentCouncil from "../pages/BeyondAcademics/StudentCouncil/StudentCouncil";
+import BeyondSports from "../pages/BeyondAcademics/BeyondSports";
+import ClubsActivities from "../pages/BeyondAcademics/ClubsActivities";
+import MessMenu from "../pages/BeyondAcademics/MessMenu";
+import TransportSOP from "../pages/BeyondAcademics/TransportSOP";
+import StudentCorner from "../pages/BeyondAcademics/StudentCorner";
+import StudentCouncil from "../pages/BeyondAcademics/StudentCouncil";
 
 // Admissions
-import AdmissionsOverview from "../pages/Admissions/AdmissionsOverview/AdmissionsOverview";
-import AdmissionsProcess from "../pages/Admissions/AdmissionsProcess/AdmissionsProcess";
-import AgeCriteria from "../pages/Admissions/AgeCriteria/AgeCriteria";
-import AdmissionsSOP from "../pages/Admissions/AdmissionsSOP/AdmissionsSOP";
-import AdmissionsFAQ from "../pages/Admissions/AdmissionsFAQ/AdmissionsFAQ";
+import AdmissionsOverview from "../pages/Admissions/AdmissionsOverview";
+import AdmissionsProcess from "../pages/Admissions/AdmissionsProcess";
+import AgeCriteria from "../pages/Admissions/AgeCriteria";
+import AdmissionsSOP from "../pages/Admissions/AdmissionsSOP";
+import AdmissionsFAQ from "../pages/Admissions/AdmissionsFAQ";
 
 // Gallery
-import GalleryPhotos from "../pages/Gallery/GalleryPhotos/GalleryPhotos";
-import KindergartenKaleidoscope from "../pages/Gallery/KindergartenKaleidoscope/KindergartenKaleidoscope";
-import GalleryVideos from "../pages/Gallery/GalleryVideos/GalleryVideos";
+import GalleryPhotos from "../pages/Gallery/GalleryPhotos";
+import KindergartenKaleidoscope from "../pages/Gallery/KindergartenKaleidoscope";
+import GalleryVideos from "../pages/Gallery/GalleryVideos";
 
 // Contact
-import ContactForAdmission from "../pages/Contact/ContactForAdmission/ContactForAdmission";
-import Careers from "../pages/Contact/Careers/Careers";
+import ContactForAdmission from "../pages/Contact/ContactForAdmission";
+import Careers from "../pages/Contact/Careers";
 
 //Common Form
 import CommonForm from "../pages/CommonForm/CommonForm";
