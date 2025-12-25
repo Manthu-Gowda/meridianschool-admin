@@ -1,10 +1,36 @@
-import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./StudentCorner.scss";
+import SubHeader from "../../../components/SubHeader/SubHeader";
+import BlockCard from "../../../components/BlockCards/BlockCards";
+import Loader from "../../../components/Loader/Loader";
+import { contentTypeConfig } from "../../../helpers/contentConstant";
 
-const StudentCorner = () => (
-  <div className="student-corner page">
-    <h2>Student Corner</h2>
-  </div>
-);
+const StudentCorner = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCardClick = (typeId) => {
+    navigate(`/common-form/${typeId}`);
+  };
+
+  return (
+    <div className="student-corner page">
+      {isLoading && <Loader />}
+      <SubHeader title="Customize Student Corner" showBack={false} showRight={false} />
+      <div className="home_section">
+        {contentTypeConfig
+          .filter((item) => item.typeId >= 77 && item.typeId <= 78)
+          .map((item) => (
+            <BlockCard
+              key={item.typeId}
+              title={item.typeName}
+              onClick={() => handleCardClick(item.typeId)}
+            />
+          ))}
+      </div>
+    </div>
+  );
+};
 
 export default StudentCorner;

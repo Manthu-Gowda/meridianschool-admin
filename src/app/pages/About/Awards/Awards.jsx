@@ -1,10 +1,36 @@
-import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Awards.scss";
+import SubHeader from "../../../components/SubHeader/SubHeader";
+import BlockCard from "../../../components/BlockCards/BlockCards";
+import Loader from "../../../components/Loader/Loader";
+import { contentTypeConfig } from "../../../helpers/contentConstant";
 
-const Awards = () => (
-  <div className="awards page">
-    <h2>Awards & Accolades</h2>
-  </div>
-);
+const Awards = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCardClick = (typeId) => {
+    navigate(`/common-form/${typeId}`);
+  };
+
+  return (
+    <div className="awards page">
+      {isLoading && <Loader />}
+      <SubHeader title="Customize Awards Page" showBack={false} showRight={false} />
+      <div className="home_section">
+        {contentTypeConfig
+          .filter((item) => item.typeId >= 22 && item.typeId <= 24)
+          .map((item) => (
+            <BlockCard
+              key={item.typeId}
+              title={item.typeName}
+              onClick={() => handleCardClick(item.typeId)}
+            />
+          ))}
+      </div>
+    </div>
+  );
+};
 
 export default Awards;

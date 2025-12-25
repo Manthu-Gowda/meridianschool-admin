@@ -1,10 +1,36 @@
-import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AdmissionsFAQ.scss";
+import SubHeader from "../../../components/SubHeader/SubHeader";
+import BlockCard from "../../../components/BlockCards/BlockCards";
+import Loader from "../../../components/Loader/Loader";
+import { contentTypeConfig } from "../../../helpers/contentConstant";
 
-const AdmissionsFAQ = () => (
-  <div className="admissions-faq page">
-    <h2>Admissions FAQ</h2>
-  </div>
-);
+const AdmissionsFAQ = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCardClick = (typeId) => {
+    navigate(`/common-form/${typeId}`);
+  };
+
+  return (
+    <div className="admissions-faq page">
+      {isLoading && <Loader />}
+      <SubHeader title="Customize Admissions FAQ" showBack={false} showRight={false} />
+      <div className="home_section">
+        {contentTypeConfig
+          .filter((item) => item.typeId >= 95 && item.typeId <= 96)
+          .map((item) => (
+            <BlockCard
+              key={item.typeId}
+              title={item.typeName}
+              onClick={() => handleCardClick(item.typeId)}
+            />
+          ))}
+      </div>
+    </div>
+  );
+};
 
 export default AdmissionsFAQ;

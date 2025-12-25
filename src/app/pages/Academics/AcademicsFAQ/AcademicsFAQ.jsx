@@ -1,10 +1,38 @@
-import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./AcademicsFAQ.scss";
+import SubHeader from "../../../components/SubHeader/SubHeader";
+import BlockCard from "../../../components/BlockCards/BlockCards";
+import Loader from "../../../components/Loader/Loader";
+import { contentTypeConfig } from "../../../helpers/contentConstant";
 
-const AcademicsFAQ = () => (
-  <div className="academics-faq page">
-    <h2>Academics FAQ</h2>
-  </div>
-);
+const AcademicsFAQ = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCardClick = (typeId) => {
+    navigate(`/common-form/${typeId}`);
+  };
+
+  return (
+    <div className="academics-faq page">
+      {isLoading && <Loader />}
+      <SubHeader title="Customize Academics FAQ" showBack={false} showRight={false} />
+      <div className="home_section">
+        <div className="home_section">
+          {contentTypeConfig
+            .filter((item) => item.typeId >= 45 && item.typeId <= 47)
+            .map((item) => (
+              <BlockCard
+                key={item.typeId}
+                title={item.typeName}
+                onClick={() => handleCardClick(item.typeId)}
+              />
+            ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default AcademicsFAQ;

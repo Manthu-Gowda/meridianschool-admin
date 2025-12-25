@@ -1,10 +1,36 @@
-import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Testimonials.scss";
+import SubHeader from "../../../components/SubHeader/SubHeader";
+import BlockCard from "../../../components/BlockCards/BlockCards";
+import Loader from "../../../components/Loader/Loader";
+import { contentTypeConfig } from "../../../helpers/contentConstant";
 
-const Testimonials = () => (
-  <div className="testimonials page">
-    <h2>Testimonials</h2>
-  </div>
-);
+const Testimonials = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCardClick = (typeId) => {
+    navigate(`/common-form/${typeId}`);
+  };
+
+  return (
+    <div className="testimonials page">
+      {isLoading && <Loader />}
+      <SubHeader title="Customize Testimonials Page" showBack={false} showRight={false} />
+      <div className="home_section">
+        {contentTypeConfig
+          .filter((item) => item.typeId === 6)
+          .map((item) => (
+            <BlockCard
+              key={item.typeId}
+              title={item.typeName}
+              onClick={() => handleCardClick(item.typeId)}
+            />
+          ))}
+      </div>
+    </div>
+  );
+};
 
 export default Testimonials;

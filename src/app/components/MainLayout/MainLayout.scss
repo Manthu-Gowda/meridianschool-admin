@@ -61,6 +61,7 @@
         border-radius: 10px;
         object-fit: cover;
       }
+
       &_name {
         font-weight: 700;
         font-size: 20px;
@@ -105,6 +106,7 @@
         border-radius: 50%;
         object-fit: cover;
       }
+
       .user_meta {
         display: flex;
         flex-direction: column;
@@ -116,6 +118,7 @@
           color: $primary_text;
           font-size: 16px;
         }
+
         .user_role {
           font-size: 12px;
           text-align: left;
@@ -140,12 +143,15 @@
 /* ===== Sidebar ===== */
 .sidebar1 {
   width: 240px;
+  flex-shrink: 0;
+  /* ✅ Fix: Prevent sidebar from shrinking */
   border: 1px solid #d7f0ff;
   border-radius: 24px;
   background-color: $primary_white;
   padding: 20px;
   display: flex;
   flex-direction: column;
+
   &_top {
     display: flex;
     justify-content: space-between;
@@ -179,8 +185,10 @@
     padding-top: 10px;
     flex: 1 1 auto;
     overflow-y: auto;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge legacy */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge legacy */
 
     &::-webkit-scrollbar {
       /* Chrome/Safari/Edge */
@@ -188,6 +196,7 @@
       height: 0;
       display: none;
     }
+
     &_menu {
       list-style: none;
       padding: 0;
@@ -281,11 +290,13 @@
         font-weight: 500;
         font-size: 16px;
       }
+
       .sidebar1_logout_icon {
         display: inline-flex;
       }
     }
   }
+
   /* ===== Submenu ===== */
   &_submenu {
     list-style: none;
@@ -296,6 +307,7 @@
     flex-direction: column;
     gap: 6px;
   }
+
   &_submenu_btn {
     display: inline-flex;
     align-items: center;
@@ -428,6 +440,7 @@
     flex: 0 0 auto;
     margin-top: auto;
   }
+
   .sidebar1.mobile-drawer.open {
     transform: translateX(0);
   }
