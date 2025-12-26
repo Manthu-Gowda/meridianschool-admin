@@ -17,7 +17,6 @@ const Newsletter = () => {
     <div className="home">
       {isLoading && <Loader />}
       <SubHeader title="Customize Newsletters" showBack={false} showRight={false} />
-      <div className="home_section">
         <div className="home_section">
           {contentTypeConfig
             .filter((item) => item.typeId >= 48 && item.typeId <= 49)
@@ -29,7 +28,6 @@ const Newsletter = () => {
               />
             ))}
         </div>
-      </div>
     </div>
   );
 };

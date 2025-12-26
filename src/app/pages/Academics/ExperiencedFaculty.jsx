@@ -17,7 +17,6 @@ const ExperiencedFaculty = () => {
     <div className="home">
       {isLoading && <Loader />}
       <SubHeader title="Customize Experienced Faculty" showBack={false} showRight={false} />
-      <div className="home_section">
         <div className="home_section">
           {contentTypeConfig
             .filter((item) => item.typeId >= 37 && item.typeId <= 44)
@@ -29,7 +28,6 @@ const ExperiencedFaculty = () => {
               />
             ))}
         </div>
-      </div>
     </div>
   );
 };

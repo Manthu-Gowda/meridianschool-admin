@@ -17,7 +17,6 @@ const AcademicsFAQ = () => {
     <div className="home">
       {isLoading && <Loader />}
       <SubHeader title="Customize Academics FAQ" showBack={false} showRight={false} />
-      <div className="home_section">
         <div className="home_section">
           {contentTypeConfig
             .filter((item) => item.typeId >= 45 && item.typeId <= 47)
@@ -29,7 +28,6 @@ const AcademicsFAQ = () => {
               />
             ))}
         </div>
-      </div>
     </div>
   );
 };

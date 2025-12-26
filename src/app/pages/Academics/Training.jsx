@@ -14,21 +14,19 @@ const Training = () => {
   };
 
   return (
-  <div className="home">
+    <div className="home">
       {isLoading && <Loader />}
       <SubHeader title="Customize Training" showBack={false} showRight={false} />
       <div className="home_section">
-        <div className="home_section">
-          {contentTypeConfig
-            .filter((item) => item.typeId >= 52 && item.typeId <= 54)
-            .map((item) => (
-              <BlockCard
-                key={item.typeId}
-                title={item.typeName}
-                onClick={() => handleCardClick(item.typeId)}
-              />
-            ))}
-        </div>
+        {contentTypeConfig
+          .filter((item) => item.typeId >= 52 && item.typeId <= 54)
+          .map((item) => (
+            <BlockCard
+              key={item.typeId}
+              title={item.typeName}
+              onClick={() => handleCardClick(item.typeId)}
+            />
+          ))}
       </div>
     </div>
   );

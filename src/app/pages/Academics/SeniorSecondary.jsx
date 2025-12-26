@@ -17,7 +17,6 @@ const SeniorSecondary = () => {
 <div className="home">
       {isLoading && <Loader />}
       <SubHeader title="Customize Senior Secondary" showBack={false} showRight={false} />
-      <div className="home_section">
         <div className="home_section">
           {contentTypeConfig
             .filter((item) => item.typeId >= 55 && item.typeId <= 56)
@@ -29,7 +28,6 @@ const SeniorSecondary = () => {
               />
             ))}
         </div>
-      </div>
     </div>
   );
 };

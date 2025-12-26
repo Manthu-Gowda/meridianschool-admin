@@ -17,7 +17,6 @@ const CurriculumSupportProgram = () => {
     <div className="home">
       {isLoading && <Loader />}
       <SubHeader title="Customize Curriculum Support" showBack={false} showRight={false} />
-      <div className="home_section">
         <div className="home_section">
           {contentTypeConfig
             .filter((item) => item.typeId >= 57 && item.typeId <= 58)
@@ -29,7 +28,6 @@ const CurriculumSupportProgram = () => {
               />
             ))}
         </div>
-      </div>
     </div>
   );
 };

@@ -237,51 +237,51 @@ const MENUS = [
     ],
   },
 
-  {
-    key: "gallery",
-    text: "Gallery",
-    icon: <PictureOutlined />,
-    children: [
-      {
-        key: "gallery.photos",
-        text: "Photo Gallery",
-        path: "/gallery/photos",
-        icon: <CameraOutlined />,
-      },
-      {
-        key: "gallery.kindergarten",
-        text: "Kindergarten Kaleidoscope",
-        path: "/gallery/kindergarten-kaleidoscope",
-        icon: <PictureOutlined />,
-      },
-      {
-        key: "gallery.videos",
-        text: "Video Gallery",
-        path: "/gallery/videos",
-        icon: <VideoCameraOutlined />,
-      },
-    ],
-  },
+  // {
+  //   key: "gallery",
+  //   text: "Gallery",
+  //   icon: <PictureOutlined />,
+  //   children: [
+  //     {
+  //       key: "gallery.photos",
+  //       text: "Photo Gallery",
+  //       path: "/gallery/photos",
+  //       icon: <CameraOutlined />,
+  //     },
+  //     {
+  //       key: "gallery.kindergarten",
+  //       text: "Kindergarten Kaleidoscope",
+  //       path: "/gallery/kindergarten-kaleidoscope",
+  //       icon: <PictureOutlined />,
+  //     },
+  //     {
+  //       key: "gallery.videos",
+  //       text: "Video Gallery",
+  //       path: "/gallery/videos",
+  //       icon: <VideoCameraOutlined />,
+  //     },
+  //   ],
+  // },
 
-  {
-    key: "contact",
-    text: "Contact Us",
-    icon: <PhoneOutlined />,
-    children: [
-      {
-        key: "contact.admission",
-        text: "For Admission",
-        path: "/contact/admission",
-        icon: <PhoneFilled />,
-      },
-      {
-        key: "contact.careers",
-        text: "Careers",
-        path: "/contact/careers",
-        icon: <TeamOutlined />,
-      },
-    ],
-  },
+  // {
+  //   key: "contact",
+  //   text: "Contact Us",
+  //   icon: <PhoneOutlined />,
+  //   children: [
+  //     {
+  //       key: "contact.admission",
+  //       text: "For Admission",
+  //       path: "/contact/admission",
+  //       icon: <PhoneFilled />,
+  //     },
+  //     {
+  //       key: "contact.careers",
+  //       text: "Careers",
+  //       path: "/contact/careers",
+  //       icon: <TeamOutlined />,
+  //     },
+  //   ],
+  // },
 ];
 
 const MainLayout = () => {
@@ -370,9 +370,8 @@ const MainLayout = () => {
           >
             <button
               type="button"
-              className={`sidebar1_center_menu_btn ${
-                isActive ? "is-active" : ""
-              }`}
+              className={`sidebar1_center_menu_btn ${isActive ? "is-active" : ""
+                }`}
               onClick={() => handleParentClick(item)}
               aria-expanded={hasChildren ? isOpen : undefined}
             >
@@ -380,7 +379,7 @@ const MainLayout = () => {
               <span className="sidebar1_center_menu_label">{item.text}</span>
               {hasChildren && (
                 <span className={`submenu_caret ${isOpen ? "open" : ""}`}>
-               <CaretDownOutlined />
+                  <CaretDownOutlined />
                 </span>
               )}
             </button>
@@ -393,9 +392,8 @@ const MainLayout = () => {
                     <li key={child.key} className="sidebar1_submenu_row">
                       <button
                         type="button"
-                        className={`sidebar1_submenu_btn ${
-                          childActive ? "is-active" : ""
-                        }`}
+                        className={`sidebar1_submenu_btn ${childActive ? "is-active" : ""
+                          }`}
                         onClick={() => handleChildClick(child.path)}
                       >
                         {child.icon && (

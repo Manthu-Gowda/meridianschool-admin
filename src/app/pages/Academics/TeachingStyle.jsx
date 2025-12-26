@@ -17,7 +17,6 @@ const TeachingStyle = () => {
  <div className="home">
       {isLoading && <Loader />}
       <SubHeader title="Customize Teaching Style" showBack={false} showRight={false} />
-      <div className="home_section">
         <div className="home_section">
           {contentTypeConfig
             .filter((item) => item.typeId === 36)
@@ -29,7 +28,6 @@ const TeachingStyle = () => {
               />
             ))}
         </div>
-      </div>
     </div>
   );
 };
